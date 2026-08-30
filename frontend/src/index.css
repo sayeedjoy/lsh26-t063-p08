@@ -1,0 +1,362 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+/* The register's three hands.
+   Archivo (width axis) sets the printed column headers of the form.
+   Public Sans is the face drawn for government forms — it carries the prose.
+   Plex Mono carries every figure, subject code and rule citation. */
+@import "@fontsource-variable/archivo/wdth.css";
+@import "@fontsource-variable/public-sans";
+@import "@fontsource/ibm-plex-mono/400.css";
+@import "@fontsource/ibm-plex-mono/500.css";
+@import "@fontsource/ibm-plex-mono/600.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+    --font-display: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-sans: 'Public Sans Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+
+    /* The register's own vocabulary, on top of the shadcn contract. */
+    --color-rule: var(--rule);
+    --color-rule-strong: var(--rule-strong);
+    --color-seal: var(--seal);
+    --color-seal-foreground: var(--seal-foreground);
+    --color-seal-soft: var(--seal-soft);
+    --color-oxide: var(--oxide);
+    --color-oxide-soft: var(--oxide-soft);
+    --color-ochre: var(--ochre);
+    --color-ochre-soft: var(--ochre-soft);
+
+    --color-sidebar-ring: var(--sidebar-ring);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar: var(--sidebar);
+    --color-chart-5: var(--chart-5);
+    --color-chart-4: var(--chart-4);
+    --color-chart-3: var(--chart-3);
+    --color-chart-2: var(--chart-2);
+    --color-chart-1: var(--chart-1);
+    --color-ring: var(--ring);
+    --color-input: var(--input);
+    --color-border: var(--border);
+    --color-destructive: var(--destructive);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-accent: var(--accent);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-muted: var(--muted);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-secondary: var(--secondary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-primary: var(--primary);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-popover: var(--popover);
+    --color-card-foreground: var(--card-foreground);
+    --color-card: var(--card);
+    --color-foreground: var(--foreground);
+    --color-background: var(--background);
+
+    --radius-sm: 2px;
+    --radius-md: 3px;
+    --radius-lg: var(--radius);
+    --radius-xl: 5px;
+    --radius-2xl: 6px;
+    --radius-3xl: 8px;
+    --radius-4xl: 10px;
+}
+
+/* ------------------------------------------------------------------ *
+ * The sheet — pale columnar ledger stock, blue-black registrar ink.
+ * Oxide red is spent on exactly one thing: a cancelled result.
+ * ------------------------------------------------------------------ */
+:root {
+    --background: #e8efe5;   /* the desk the register lies on */
+    --foreground: #0e1a16;   /* registrar ink */
+    --card: #fbfcf8;         /* the ledger sheet itself */
+    --card-foreground: #0e1a16;
+    --popover: #fafbf7;
+    --popover-foreground: #0e1a16;
+
+    --primary: #1c5d4c;      /* board green — the seal */
+    --primary-foreground: #f4f8f2;
+    --secondary: #e2e9de;
+    --secondary-foreground: #16241e;
+    --muted: #e5ecdf;
+    --muted-foreground: #59685f;
+    --accent: #dde8d8;
+    --accent-foreground: #16241e;
+
+    --destructive: #a8321e;  /* the strike through a cancelled figure */
+    --border: #cbd8cc;
+    --input: #c2d1c3;
+    --ring: #1c5d4c;
+
+    --rule: #cbd8cc;
+    --rule-strong: #a5bba9;
+    --seal: #1c5d4c;
+    --seal-foreground: #f4f8f2;
+    --seal-soft: #dcebe2;
+    --oxide: #a8321e;
+    --oxide-soft: #f7e3de;
+    --ochre: #7c5810;
+    --ochre-soft: #f5ead0;
+
+    --chart-1: #1c5d4c;
+    --chart-2: #3d7f66;
+    --chart-3: #63a082;
+    --chart-4: #7c5810;
+    --chart-5: #a8321e;
+
+    --radius: 3px;
+
+    --sidebar: #e0e8db;
+    --sidebar-foreground: #0e1a16;
+    --sidebar-primary: #1c5d4c;
+    --sidebar-primary-foreground: #f4f8f2;
+    --sidebar-accent: #d6e0d1;
+    --sidebar-accent-foreground: #0e1a16;
+    --sidebar-border: #c2d1c3;
+    --sidebar-ring: #1c5d4c;
+}
+
+/* Dark — the carbon copy of the same sheet, read off microfilm. */
+.dark {
+    --background: #0b120f;
+    --foreground: #dde5df;
+    --card: #111a16;
+    --card-foreground: #dde5df;
+    --popover: #141e19;
+    --popover-foreground: #dde5df;
+
+    --primary: #4fb79a;
+    --primary-foreground: #06120e;
+    --secondary: #1b2822;
+    --secondary-foreground: #dde5df;
+    --muted: #17231e;
+    --muted-foreground: #86988e;
+    --accent: #1b2822;
+    --accent-foreground: #dde5df;
+
+    --destructive: #e5715a;
+    --border: #21312a;
+    --input: #2b3d35;
+    --ring: #4fb79a;
+
+    --rule: #21312a;
+    --rule-strong: #33473d;
+    --seal: #4fb79a;
+    --seal-foreground: #06120e;
+    --seal-soft: #142b24;
+    --oxide: #e5715a;
+    --oxide-soft: #2e1713;
+    --ochre: #d6a648;
+    --ochre-soft: #2b2211;
+
+    --chart-1: #4fb79a;
+    --chart-2: #3d9c82;
+    --chart-3: #2e7a66;
+    --chart-4: #d6a648;
+    --chart-5: #e5715a;
+
+    --sidebar: #0e1713;
+    --sidebar-foreground: #dde5df;
+    --sidebar-primary: #4fb79a;
+    --sidebar-primary-foreground: #06120e;
+    --sidebar-accent: #1b2822;
+    --sidebar-accent-foreground: #dde5df;
+    --sidebar-border: #21312a;
+    --sidebar-ring: #4fb79a;
+}
+
+@layer base {
+    * {
+        @apply border-border;
+    }
+
+    /* One focus treatment, everywhere, always visible. */
+    :focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+    }
+
+    html {
+        @apply font-sans;
+        -webkit-text-size-adjust: 100%;
+    }
+
+    body {
+        @apply bg-background text-foreground;
+        font-feature-settings: "cv05" 1;
+    }
+
+    /* Figures are the product here — never let them shift width. */
+    .font-mono,
+    [class*="tabular"] {
+        font-variant-numeric: tabular-nums;
+    }
+
+    ::selection {
+        background: color-mix(in oklab, var(--seal) 24%, transparent);
+    }
+}
+
+@layer components {
+    /* A printed column header on the form: condensed, small, spaced out. */
+    .label-form {
+        font-family: var(--font-display);
+        font-stretch: 78%;
+        font-weight: 650;
+        font-size: 0.6875rem;
+        line-height: 1.1;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+    }
+
+    /* The register's own headings — condensed, heavy, set tight. */
+    .heading-register {
+        font-family: var(--font-display);
+        font-stretch: 84%;
+        font-weight: 700;
+        letter-spacing: -0.005em;
+        line-height: 1.08;
+    }
+
+    /* The masthead of the book. */
+    .heading-masthead {
+        font-family: var(--font-display);
+        font-stretch: 70%;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        line-height: 1;
+    }
+
+    /* A rule citation, set as marginalia. */
+    .cite {
+        font-family: var(--font-mono);
+        font-size: 0.6875rem;
+        font-weight: 500;
+        letter-spacing: 0.02em;
+        font-variant-numeric: tabular-nums;
+        color: var(--muted-foreground);
+    }
+
+    /*
+     * The one badge in the app. Everything else in the register is a record to
+     * be read; the mark sheet is the single page you can actually operate, so
+     * it gets a soft ring that draws the eye without ever moving the layout.
+     * The reduced-motion block below stops the ring for anyone who asks.
+     */
+    .badge-live {
+        animation: badge-ring 2.8s ease-out infinite;
+    }
+
+    @keyframes badge-ring {
+        0% {
+            box-shadow: 0 0 0 0 color-mix(in oklab, var(--seal) 60%, transparent);
+        }
+        70%,
+        100% {
+            box-shadow: 0 0 0 5px color-mix(in oklab, var(--seal) 0%, transparent);
+        }
+    }
+
+    /* A struck figure: what the arithmetic gave, before the rule cancelled it. */
+    .struck {
+        position: relative;
+        color: var(--muted-foreground);
+    }
+
+    .struck::after {
+        content: "";
+        position: absolute;
+        inset-inline: -0.15em;
+        top: 52%;
+        height: max(2px, 0.07em);
+        background: var(--oxide);
+        transform: rotate(-6deg);
+        transform-origin: center;
+        border-radius: 2px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ------------------------------------------------------------------ *
+ * Print — the checking lists leave this screen as paper. Force the
+ * light sheet, drop every control, and keep the rules crisp and black.
+ * ------------------------------------------------------------------ */
+@media print {
+    :root,
+    .dark {
+        --background: #ffffff;
+        --foreground: #000000;
+        --card: #ffffff;
+        --card-foreground: #000000;
+        --muted: #ffffff;
+        --muted-foreground: #333333;
+        --border: #999999;
+        --rule: #999999;
+        --rule-strong: #666666;
+        --primary: #000000;
+        --destructive: #000000;
+        --oxide: #000000;
+        --seal: #000000;
+        --ochre: #000000;
+        --seal-soft: #ffffff;
+        --oxide-soft: #ffffff;
+        --ochre-soft: #ffffff;
+    }
+
+    body {
+        font-size: 10pt;
+    }
+
+    .print\:hidden {
+        display: none !important;
+    }
+
+    /* Keep a candidate's row whole across a page break. A whole list is
+       taller than a page, so only the row can be held together. */
+    tr {
+        break-inside: avoid;
+    }
+
+    /* Each list starts a fresh page, the way the office files them. */
+    .sheet + .sheet {
+        break-before: page;
+    }
+
+    thead {
+        display: table-header-group;
+    }
+
+    /* On screen a wide table scrolls sideways; on paper it must fit the
+       sheet, so the minimum width the scroller relied on is released. */
+    table {
+        min-width: 0 !important;
+    }
+
+    /* Scrollers become plain blocks — nothing can scroll on paper. */
+    .overflow-x-auto,
+    .overflow-y-auto {
+        overflow: visible !important;
+        max-height: none !important;
+    }
+}

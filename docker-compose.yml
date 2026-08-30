@@ -1,0 +1,61 @@
+# Local convenience: database + API + UI, the same three services you would
+# create separately on Dokploy.
+#
+# On Dokploy you do not use this file. Create a PostgreSQL service, then one
+# app per folder (backend/, frontend/) — each has its own Dockerfile — and set
+# the environment variables noted below.
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: p08
+      POSTGRES_PASSWORD: p08
+      POSTGRES_DB: p08
+    ports:
+      # 55432 on the host, not 5432: a natively-installed PostgreSQL commonly
+      # already owns 5432 and would silently win for localhost connections.
+      # Containers still reach it as db:5432 on the compose network.
+      - "55432:5432"
+    volumes:
+      - p08-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U p08"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      PORT: 3000
+      DATABASE_URL: postgres://p08:p08@db:5432/p08
+      # Local Postgres has no TLS. Managed providers usually need this true.
+      DATABASE_SSL: "false"
+      # The UI is a separate origin now, so the API must allow it explicitly.
+      # Unset means no CORS headers at all — correct for same-origin, fatal
+      # here. On Dokploy set this to the UI's public URL.
+      CORS_ORIGIN: http://localhost:8080
+    ports:
+      # 3100 on the host, not 3000, for the same reason db uses 55432: the
+      # backend's own `pnpm dev` owns 3000 locally, and whichever started
+      # first would block the other. Inside the network it is still api:3000.
+      - "3100:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build: ./frontend
+    environment:
+      PORT: 8080
+      # Read at runtime by server.mjs and served as /env.js — this is the
+      # browser's view of the API, so it must be reachable from the browser,
+      # not from inside the compose network.
+      API_URL: http://localhost:3100
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+
+volumes:
+  p08-db:
