@@ -1,9 +1,9 @@
 # Local convenience: database + API + UI, the same three services you would
 # create separately on Dokploy.
 #
-# On Dokploy you do not use this file. Create a PostgreSQL service, then one
-# app per folder (backend/, frontend/) — each has its own Dockerfile — and set
-# the environment variables noted below.
+# On Dokploy you do not use this file. Create a PostgreSQL service, then two
+# apps from the repository-root context, selecting backend/Dockerfile and
+# frontend/Dockerfile respectively, and set the environment variables below.
 services:
   db:
     image: postgres:16-alpine
@@ -25,7 +25,9 @@ services:
       retries: 10
 
   api:
-    build: ./backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
     environment:
       PORT: 3000
       DATABASE_URL: postgres://p08:p08@db:5432/p08
@@ -45,7 +47,9 @@ services:
         condition: service_healthy
 
   web:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     environment:
       PORT: 8080
       # Read at runtime by server.mjs and served as /env.js — this is the

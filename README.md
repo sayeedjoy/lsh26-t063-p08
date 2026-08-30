@@ -217,8 +217,8 @@ frontend/               Standalone app — own package.json, lockfile, Dockerfil
 
 ## Docker / hosting
 
-**Two images, each built from its own directory.** Both are multi-stage, run as
-a non-root user and carry a `HEALTHCHECK` that drives Dokploy's rollout status.
+**Two images built from the repository root.** Both are multi-stage, run as a
+non-root user and carry a `HEALTHCHECK` that drives Dokploy's rollout status.
 
 - `backend/Dockerfile` → `node dist/server.js` on `$PORT` (default `3000`),
   JSON API under `/api`, healthcheck `/api/health`. The dataset ships inside
@@ -233,14 +233,14 @@ docker compose up --build      # db + backend + frontend -> :8080 and :3000
 
 ### Dokploy
 
-Create **three services** from this repo. Neither app's build context is the
-repo root — each one is its own directory, so point Dokploy at it:
+Create **three services** from this repo. Both apps use the repository root as
+their Docker context; select the app-specific Dockerfile for each service:
 
 | Service | Docker context | Dockerfile | Port |
 |---|---|---|---|
 | `postgres` | Dokploy's own PostgreSQL service | — | 5432 |
-| `backend` | `./backend` | `Dockerfile` | 3000 |
-| `frontend` | `./frontend` | `Dockerfile` | 8080 |
+| `backend` | `.` | `backend/Dockerfile` | 3000 |
+| `frontend` | `.` | `frontend/Dockerfile` | 8080 |
 
 Then set the variables. The two apps find each other **only** through these —
 get them wrong and the UI loads but every request fails CORS:

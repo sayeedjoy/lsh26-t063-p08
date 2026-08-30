@@ -6,20 +6,20 @@
 FROM node:22-alpine AS deps
 RUN corepack enable
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
+COPY backend/package.json backend/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
 FROM deps AS build
-COPY tsconfig.json ./
-COPY src ./src
-COPY data ./data
+COPY backend/tsconfig.json ./
+COPY backend/src ./src
+COPY backend/data ./data
 RUN pnpm run build
 
 # Only what the server needs at runtime — no tsx, no typescript.
 FROM node:22-alpine AS prod-deps
 RUN corepack enable
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
+COPY backend/package.json backend/pnpm-lock.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 FROM node:22-alpine AS runtime
@@ -30,7 +30,7 @@ RUN addgroup -S app && adduser -S app -G app
 
 COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
-COPY package.json ./
+COPY --from=prod-deps /app/package.json ./
 # The dataset is evidence the app cannot run without, so it ships in the image.
 # Staged through `build` rather than copied from the host context here
 # directly — some remote builders (e.g. Dokploy's) intermittently fail a late

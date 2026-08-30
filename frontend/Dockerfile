@@ -9,12 +9,12 @@
 FROM node:22-alpine AS build
 RUN corepack enable
 WORKDIR /app
-COPY package.json pnpm-lock.yaml* ./
+COPY frontend/package.json frontend/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
-COPY tsconfig*.json vite.config.ts index.html ./
-COPY public ./public
-COPY src ./src
-COPY server.mjs ./
+COPY frontend/tsconfig*.json frontend/vite.config.ts frontend/index.html ./
+COPY frontend/public ./public
+COPY frontend/src ./src
+COPY frontend/server.mjs ./
 RUN pnpm run build
 
 FROM node:22-alpine AS runtime
