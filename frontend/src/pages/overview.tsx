@@ -2,6 +2,7 @@ import { ErrorState, LoadingState, PageHead } from "@/App"
 import { api } from "@/api"
 import { CaseSummaryBlocks } from "@/components/case-summary"
 import { Mark, Sheet } from "@/components/ledger"
+import { SavedSheets } from "@/components/saved-sheets"
 import { StudentTable } from "@/components/student-table"
 import { useAsync } from "@/hooks/use-async"
 
@@ -48,11 +49,13 @@ export function OverviewPage({
   onOpenStudent,
   onOpenChecklists,
   onOpenAudit,
+  onOpenSheet,
 }: {
   caseId: string
   onOpenStudent: (studentId: string) => void
   onOpenChecklists: () => void
   onOpenAudit: () => void
+  onOpenSheet: (sheetId: number) => void
 }) {
   const { data, error, loading } = useAsync(() => api.caseDetail(caseId), [caseId])
 
@@ -72,6 +75,7 @@ export function OverviewPage({
       <AuditStrip caseId={caseId} onOpenAudit={onOpenAudit} />
       <CaseSummaryBlocks summary={summary} onOpenChecklists={onOpenChecklists} />
       <StudentTable students={data.results} onOpenStudent={onOpenStudent} />
+      <SavedSheets caseId={caseId} onOpenSheet={onOpenSheet} />
     </div>
   )
 }

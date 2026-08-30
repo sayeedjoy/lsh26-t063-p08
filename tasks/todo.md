@@ -473,3 +473,35 @@ Give deliverable 1 the page it was missing.
 > ### Checkpoint G — Every deliverable has a screen
 > - [x] D1 audit, D2 grading, D3 trace, D4 checking lists are each reachable from the nav.
 > - [x] `9 of 9 criteria` for `PUB-01`, 29 hard-edge candidates, matching the API exactly.
+
+---
+
+### Task 23: Saved sheets on the roll
+**Description:** A sheet saved from the mark sheet was stored, graded and listed — but only
+on the mark sheet itself. Anyone who saved one and then went to look for it on the roll
+found nothing, which reads as a lost record rather than a design decision.
+
+**Acceptance criteria:**
+- [x] Sheets saved against the open case appear in their own band at the foot of the roll,
+      marked `added`, with GPA, letter and when they were saved.
+- [x] They are **not** folded into the roll's own figures: the case summary, the audit and
+      the checking lists continue to describe the supplied dataset only, so the roll cannot
+      disagree with the API, the export or the audit.
+- [x] Opening one loads it back into the mark sheet, via a linkable
+      `?page=calculator&sheet=<id>`.
+- [x] Restoring a sheet survives either fetch landing first — the case and the saved list
+      are independent requests, and a reseed re-applies the requested sheet over its
+      defaults rather than silently winning.
+- [x] Refetching the saved list after a save or delete never discards what has been typed
+      since.
+- [x] With no database the band renders nothing at all — a missing database is not an error
+      worth reporting on the roll.
+
+**Verify:** `pnpm run typecheck` clean · `pnpm run build` clean · headless: band visible on
+`?case=PUB-01`, clicking a row lands on `?page=calculator&sheet=2` with the name field
+restored, no console errors
+**Dependencies:** Tasks 21, 22
+**Files:** `frontend/src/components/saved-sheets.tsx`, `frontend/src/pages/overview.tsx`,
+`frontend/src/pages/calculator.tsx`, `frontend/src/hooks/use-route.ts`,
+`frontend/src/App.tsx`
+**Scope:** M

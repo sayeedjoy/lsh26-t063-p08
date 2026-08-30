@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Trash2 } from "lucide-react"
 
 import { evaluateStudent, type RawMark, type StudentResult } from "@/engine"
@@ -27,7 +27,7 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
   )
 }
 
-export function CalculatorPage({ caseId }: { caseId: string }) {
+export function CalculatorPage({ caseId, sheetId }: { caseId: string; sheetId: number | null }) {
   const { data: caseData, error, loading } = useAsync(() => api.caseDetail(caseId), [caseId])
 
   const [name, setName] = useState("New candidate")
@@ -35,6 +35,7 @@ export function CalculatorPage({ caseId }: { caseId: string }) {
   const [optional, setOptional] = useState<string | null>(null)
   const [marks, setMarks] = useState<Record<string, RawMark>>({})
 
+  const [seedGeneration, setSeedGeneration] = useState(0)
   const [saving, setSaving] = useState(false)
   const [saveError, setSaveError] = useState<string | null>(null)
   const [saved, setSaved] = useState<SavedCalculation[] | null>(null)
@@ -61,6 +62,10 @@ export function CalculatorPage({ caseId }: { caseId: string }) {
     }
     setMarks(seeded)
     setKlass(caseData.summary.classes[0] ?? "Class 9")
+    // Announce the reseed, so a saved sheet requested by the URL can be laid
+    // back over the defaults it just wiped — the case and the saved list are
+    // two separate fetches and either can land second.
+    setSeedGeneration((g) => g + 1)
   }, [caseData, optionalChoices])
 
   const refreshSaved = useCallback(async () => {
@@ -76,6 +81,34 @@ export function CalculatorPage({ caseId }: { caseId: string }) {
   useEffect(() => {
     void refreshSaved()
   }, [refreshSaved])
+
+  const loadSaved = useCallback((row: SavedCalculation) => {
+    setName(row.studentName)
+    setKlass(row.studentClass)
+    setOptional(row.optionalCode)
+    setMarks(row.marks)
+  }, [])
+
+  /**
+   * The roll links straight to a saved sheet (`?page=calculator&sheet=4`), so
+   * one named in the URL is laid into the form as soon as it can be.
+   *
+   * Applied once per (seeding, sheet) pair. Keying on the seed generation is
+   * what makes the order of the two fetches stop mattering: a reseed always
+   * gets the sheet put back on top of it, while a plain refetch of the saved
+   * list — which happens after every save and delete — leaves the key alone
+   * and so cannot throw away what the user has typed since.
+   */
+  const appliedSheet = useRef<string | null>(null)
+  useEffect(() => {
+    if (sheetId === null || !saved) return
+    const key = `${seedGeneration}:${sheetId}`
+    if (appliedSheet.current === key) return
+    const row = saved.find((r) => r.id === sheetId)
+    if (!row) return
+    appliedSheet.current = key
+    loadSaved(row)
+  }, [sheetId, saved, seedGeneration, loadSaved])
 
   const setMark = (code: string, next: RawMark) => setMarks((m) => ({ ...m, [code]: next }))
 
@@ -134,12 +167,6 @@ export function CalculatorPage({ caseId }: { caseId: string }) {
     }
   }
 
-  const loadSaved = (row: SavedCalculation) => {
-    setName(row.studentName)
-    setKlass(row.studentClass)
-    setOptional(row.optionalCode)
-    setMarks(row.marks)
-  }
 
   const removeSaved = async (id: number) => {
     try {

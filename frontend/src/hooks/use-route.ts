@@ -1,6 +1,7 @@
 /**
  * URL-synced app state via plain query params — no router dependency.
  * ?case=PUB-01&page=trace&student=S001
+ * ?case=PUB-01&page=calculator&sheet=4
  */
 
 import { useCallback, useSyncExternalStore } from "react"
@@ -11,6 +12,15 @@ export interface Route {
   caseId: string | null
   page: Page
   studentId: string | null
+  /** A saved sheet to load into the mark sheet, so the roll can link to one. */
+  sheetId: number | null
+}
+
+/** Saved-sheet ids are positive integers; anything else is not a sheet. */
+function sheetIdFrom(raw: string | null): number | null {
+  if (raw === null || raw.trim() === "") return null
+  const id = Number(raw)
+  return Number.isInteger(id) && id > 0 ? id : null
 }
 
 function parseRoute(search: string): Route {
@@ -27,6 +37,10 @@ function parseRoute(search: string): Route {
         ? page
         : "overview",
     studentId: params.get("student"),
+    // `Number(null)` is 0 and `Number("")` is 0, so an absent param has to be
+    // rejected before the number is looked at — otherwise every page believes
+    // it was asked for sheet 0.
+    sheetId: sheetIdFrom(params.get("sheet")),
   }
 }
 
@@ -62,6 +76,9 @@ export function useRoute(): [Route, (next: Partial<Route>) => void] {
     if (merged.caseId) params.set("case", merged.caseId)
     if (merged.page && merged.page !== "overview") params.set("page", merged.page)
     if (merged.studentId && merged.page === "trace") params.set("student", merged.studentId)
+    if (merged.sheetId !== null && merged.page === "calculator") {
+      params.set("sheet", String(merged.sheetId))
+    }
     const query = params.toString()
     const url = query ? `${window.location.pathname}?${query}` : window.location.pathname
     window.history.pushState({}, "", url)

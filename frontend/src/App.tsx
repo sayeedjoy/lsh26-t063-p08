@@ -206,6 +206,7 @@ export function App() {
                     onOpenStudent={(id) => navigate({ page: "trace", studentId: id })}
                     onOpenChecklists={() => navigate({ page: "checklists" })}
                     onOpenAudit={() => navigate({ page: "audit" })}
+                    onOpenSheet={(id) => navigate({ page: "calculator", sheetId: id })}
                   />
                 )}
                 {route.page === "audit" && (
@@ -214,7 +215,9 @@ export function App() {
                     onOpenStudent={(id) => navigate({ page: "trace", studentId: id })}
                   />
                 )}
-                {route.page === "calculator" && <CalculatorPage caseId={route.caseId} />}
+                {route.page === "calculator" && (
+                  <CalculatorPage caseId={route.caseId} sheetId={route.sheetId} />
+                )}
                 {route.page === "trace" && (
                   <StudentTracePage
                     caseId={route.caseId}
