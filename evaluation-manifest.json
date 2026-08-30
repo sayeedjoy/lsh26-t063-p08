@@ -1,0 +1,81 @@
+{
+  "team_id": "LSH26-T063-P08",
+  "problem_id": "P08",
+  "repository_name": "lsh26-t063-p08",
+  "live_url": "https://lofistack.sayeedjoy.com",
+  "demo_video_url_optional": "",
+  "event_start_code": "LSH26-8490-C900",
+  "repository_created_before_release": false,
+  "pre_event_materials": [],
+  "sample_data": {
+    "loads_published_fixture": true,
+    "method": "The published P08 JSON fixture is bundled read-only in backend/data and is validated, evaluated and cached automatically when the backend starts.",
+    "reset_instructions": "Restart or redeploy the backend to reload the bundled fixture. Saved calculations and checking-list sign-offs are stored separately in PostgreSQL and never modify the published results; recreate or truncate those tables only if the optional user-created records need resetting."
+  },
+  "problem_solving_method": "We translated the brief into named, auditable grading rules and documented every assumption where the brief was ambiguous. The backend validates the published dataset, evaluates each case once with a dependency-free TypeScript engine, and uses integer arithmetic for deterministic subject grades, GPA rounding, compulsory-failure cancellation and optional-subject adjustments. Every result carries a rule ID and calculation trace; the same evaluated results generate summaries, requirement audits and the three checking lists exposed through the JSON API. The React interface presents those outputs for office review and uses a generated copy of the same engine for its live mark-sheet calculator, preventing browser and server calculations from drifting. We chose this approach so every result can be reproduced and checked by hand, while automated boundary, invariant, API and build tests verify the full dataset and deployment artifacts.",
+  "requirements": {
+    "R1": {
+      "status": "complete",
+      "evidence": "The Audit page and GET /api/cases/:id/audit prove every case has at least 60 students, exactly two classes, six compulsory plus one optional subject per student, and the required hard-edge examples. Source and tests: backend/src/engine/audit.ts, backend/src/engine/audit.test.ts and backend/src/engine/invariants.test.ts; UI: frontend/src/pages/audit.tsx."
+    },
+    "R2": {
+      "status": "complete",
+      "evidence": "Subject grade points, GPA, optional-subject adjustment, 5.00 cap, compulsory-failure cancellation and final letters are computed by backend/src/engine/grade.ts, gpa.ts and engine.ts. Results are exposed by GET /api/cases/:id and shown on the Roll and Mark sheet pages. Boundary and golden-result coverage: grade.test.ts, gpa.test.ts, engine.test.ts and invariants.test.ts."
+    },
+    "R3": {
+      "status": "complete",
+      "evidence": "Every StudentResult contains per-subject marks, grade points, deciding rule IDs and plain-language reasons, plus step-by-step GPA working, the uncancelled average and named compulsory failing subjects. Evidence: the Trace page, GET /api/cases/:id/students/:sid, frontend/src/pages/student-trace.tsx, frontend/src/components/gpa-working.tsx, backend/src/engine/grade.ts, backend/src/engine/gpa.ts and deterministic traces.txt exports from backend/src/export.ts."
+    },
+    "R4": {
+      "status": "complete",
+      "evidence": "The Checking lists page and GET /api/cases/:id/checklists provide optional-grade-point, practical-fail and absent lists, including students appearing on multiple lists. PostgreSQL-backed sign-off records who checked each row when configured. Evidence: backend/src/engine/checklists.ts, checklists.test.ts, backend/src/db.ts, frontend/src/pages/checklists.tsx and frontend/src/components/checklist-table.tsx."
+    }
+  },
+  "team_members": [
+    {
+      "registered_name": "Sayeed Joy",
+      "github_username": "sayeedjoy",
+      "major_contribution": "Designed, implemented, tested and deployed the complete grading engine, backend API and frontend application.",
+      "evidence_paths_or_commits": [
+        "backend/src/engine",
+        "backend/src/dataset.ts",
+        "backend/src/routes.ts",
+        "backend/src/db.ts",
+        "frontend/src",
+        "backend/Dockerfile",
+        "frontend/Dockerfile"
+      ]
+    }
+  ],
+  "major_design_decisions": [
+    "Centralize all grading thresholds, bands and declared assumptions in backend/src/engine/rules.ts so a disputed rule can be corrected without searching the application.",
+    "Represent grade points as integer tenths and GPAs as integer hundredths with half-up division, avoiding floating-point errors at pass and letter-grade boundaries.",
+    "Produce the calculation trace together with each grade instead of reconstructing explanations later, ensuring the displayed rule and computed result cannot drift apart.",
+    "Validate and evaluate the complete published fixture once at backend startup, then serve an immutable snapshot for deterministic and fast API responses.",
+    "Use a generated copy of the same grading engine in the frontend calculator and verify it with scripts/sync-engine.mjs --check, while re-evaluating saved calculations on the server.",
+    "Keep PostgreSQL optional and limited to user-created calculations and checking-list sign-offs; published grades are always recomputed from the bundled fixture.",
+    "Deploy the backend and frontend as separate non-root containers, with API_URL supplied to the frontend at runtime and CORS_ORIGIN restricting the backend.",
+    "The application's visual design and design direction were developed with assistance from Claude Code and then manually reviewed."
+  ],
+  "known_limitations": [
+    "The brief does not define the subject mark-to-grade-point scale or the non-practical pass mark; the application transparently uses the declared R-GP and R-PS assumptions documented in docs/spec.md and docs/rules.md.",
+    "Saving calculator entries and recording checking-list sign-offs require PostgreSQL. All required grading, audit, trace and checking-list views remain available without a database.",
+    "There is no user authentication or authorization; a verifier types their name when signing off a checking-list row.",
+    "The split production deployment requires matching frontend API_URL and backend CORS_ORIGIN values; incorrect values prevent the browser from loading API data.",
+    "The frontend production build succeeds, but the current ESLint run reports six React hook/Fast Refresh rule violations that do not block compilation."
+  ],
+  "ai_tools_used": [
+    {
+      "tool": "Claude Code",
+      "used_for": "Visual design, design direction and implementation assistance.",
+      "how_output_was_verified": "Manually reviewed and verified with automated tests."
+    },
+    {
+      "tool": "OpenAI Codex",
+      "used_for": "Implementation assistance, Docker deployment configuration and debugging.",
+      "how_output_was_verified": "Manually reviewed and verified with automated tests."
+    }
+  ],
+  "licenses_file": "LICENSES.md",
+  "declaration": "The information above is complete and truthful to the best of the team's knowledge."
+}
