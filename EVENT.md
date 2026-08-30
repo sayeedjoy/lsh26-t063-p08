@@ -4,7 +4,7 @@
 - **Problem ID:** `P08`
 - **Repository:** `lsh26-t063-p08`
 - **Event start code:** `LSH26-8490-C900`
-- **Repository created before release:** Yes / No
+- **Repository created before release:** No
 
 ## Material present before 6:00 PM
 

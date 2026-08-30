@@ -347,6 +347,15 @@
         display: table-header-group;
     }
 
+    /* On screen the column headers hold their place with an inset shadow,
+       which browsers drop when backgrounds are not printed. On paper they are
+       an ordinary underlined row again, repeated at the head of every page. */
+    thead th {
+        position: static !important;
+        box-shadow: none !important;
+        border-bottom: 1px solid var(--rule) !important;
+    }
+
     /* On screen a wide table scrolls sideways; on paper it must fit the
        sheet, so the minimum width the scroller relied on is released. */
     table {

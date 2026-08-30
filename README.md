@@ -6,7 +6,8 @@ calculation trace, and the three office checking lists — run against the
 real supplied dataset (25 cases, 1,765 students).
 
 Full spec: [`docs/spec.md`](docs/spec.md) · Rule card: [`docs/rules.md`](docs/rules.md) ·
-Plan: [`tasks/plan.md`](tasks/plan.md) · Tasks: [`tasks/todo.md`](tasks/todo.md)
+Plan: [`tasks/plan.md`](tasks/plan.md) · Tasks: [`tasks/todo.md`](tasks/todo.md) ·
+Third-party licenses: [`LICENSES.md`](LICENSES.md)
 
 ## Stack
 

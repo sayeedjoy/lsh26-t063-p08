@@ -81,7 +81,18 @@ export function App() {
             </h1>
           </div>
 
-          <nav aria-label="Sections" className="flex overflow-x-auto lg:flex-1 lg:flex-col lg:overflow-visible lg:p-2">
+          {/* Below the sidebar breakpoint the sections were a horizontal
+              scroller, which put half the book off the edge of the screen with
+              nothing to say so. Laid out as a ruled grid instead, every
+              section is visible at once — hairline gaps do the ruling, the
+              way the index page of a register is set. */}
+          <nav
+            aria-label="Sections"
+            className={cn(
+              "grid grid-cols-2 gap-px bg-rule sm:grid-cols-3 md:grid-cols-6",
+              "lg:flex lg:flex-1 lg:flex-col lg:gap-0 lg:bg-transparent lg:p-2",
+            )}
+          >
             {NAV.map((item) => {
               const current = route.page === item.page
               return (
@@ -91,10 +102,10 @@ export function App() {
                   aria-current={current ? "page" : undefined}
                   title={item.note}
                   className={cn(
-                    "group relative shrink-0 px-4 py-2.5 text-left transition-colors lg:px-3 lg:py-2",
+                    "group relative px-3 py-2.5 text-left transition-colors lg:px-3 lg:py-2",
                     current
-                      ? "bg-card text-foreground lg:bg-card"
-                      : "text-muted-foreground hover:bg-accent/70 hover:text-foreground",
+                      ? "bg-card text-foreground"
+                      : "bg-sidebar text-muted-foreground hover:bg-accent/70 hover:text-foreground lg:bg-transparent",
                   )}
                 >
                   {/* Where the reader's thumb is in the book. */}
@@ -105,7 +116,7 @@ export function App() {
                       current ? "opacity-100" : "opacity-0",
                     )}
                   />
-                  <span className="flex items-center gap-2 pb-0.5 whitespace-nowrap">
+                  <span className="flex flex-wrap items-center gap-x-2 gap-y-0.5 pb-0.5">
                     <span className="heading-register text-[0.9375rem]">{item.label}</span>
                     {item.badge && (
                       <span

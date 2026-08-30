@@ -1,6 +1,5 @@
 import type { StudentResult } from "@/engine"
-import { Figure, Sheet, SheetHead } from "@/components/ledger"
-import { cn } from "@/lib/utils"
+import { FigureRow, Sheet, SheetHead, type FigureCell } from "@/components/ledger"
 
 /**
  * The arithmetic, step by step, with the rule that authorises each step set in
@@ -10,7 +9,7 @@ import { cn } from "@/lib/utils"
 export function GpaWorking({ student }: { student: StudentResult }) {
   const { gpa } = student
 
-  const totals = [
+  const totals: FigureCell[] = [
     { label: "Compulsory sum", value: gpa.compulsorySum },
     { label: "Optional adds", value: gpa.optionalContribution },
     {
@@ -44,33 +43,7 @@ export function GpaWorking({ student }: { student: StudentResult }) {
         ))}
       </ol>
 
-      <dl className="grid grid-cols-2 border-t border-rule sm:grid-cols-4">
-        {totals.map((total, i) => (
-          <div
-            key={total.label}
-            className={cn(
-              "border-rule px-3 py-2.5",
-              i % 2 === 0 && "border-r",
-              i === 1 && "sm:border-r",
-              i === 2 && "sm:border-r",
-              i < 2 && "border-b sm:border-b-0",
-            )}
-          >
-            <dt className="label-form">{total.label}</dt>
-            <dd className="mt-1">
-              <Figure
-                tone={total.oxide ? "oxide" : "ink"}
-                className={cn("text-lg font-medium", total.oxide && "font-semibold")}
-              >
-                {total.value}
-              </Figure>
-              {total.note && (
-                <span className="ml-1.5 text-[0.6875rem] text-muted-foreground">{total.note}</span>
-              )}
-            </dd>
-          </div>
-        ))}
-      </dl>
+      <FigureRow cells={totals} size="sm" className="border-t border-rule" />
     </Sheet>
   )
 }

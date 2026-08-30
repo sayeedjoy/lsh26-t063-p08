@@ -34,7 +34,9 @@ export function Sheet({
 }) {
   if (!cite) {
     return (
-      <section className={cn("sheet border border-rule bg-card", className)}>{children}</section>
+      <section className={cn("sheet border border-rule bg-card", className)}>
+        <div className="@container">{children}</div>
+      </section>
     )
   }
 
@@ -48,7 +50,11 @@ export function Sheet({
           {/* Stays beside whatever part of a long list you are reading. */}
           <span className="cite sm:sticky sm:top-[4.5rem]">{cite}</span>
         </div>
-        <div className="min-w-0">{children}</div>
+        {/* The container query context sits here and not on the sheet: an
+            element with `container-type` stops holding a `position: sticky`
+            child in place, and the citation beside this column has to stay
+            beside whatever part of a long list is being read. */}
+        <div className="@container min-w-0">{children}</div>
       </div>
     </section>
   )
@@ -70,7 +76,10 @@ export function SheetHead({
 }) {
   return (
     <div className={cn("flex flex-wrap items-start gap-x-4 gap-y-2 border-b border-rule p-3", className)}>
-      <div className="min-w-0 flex-1">
+      {/* A floor rather than `min-w-0`: on a narrow screen the title should
+          take the line and send its controls to the next one, not shrink into
+          a ribbon of one word per line beside them. */}
+      <div className="min-w-[13rem] flex-1">
         <h3 className="heading-register flex items-baseline gap-2 text-[0.95rem]">
           <span>{title}</span>
           {count !== undefined && (
@@ -145,6 +154,79 @@ export function Cite({ children, className }: { children: ReactNode; className?:
 }
 
 /* ------------------------------------------------------------------ */
+/* The figure band                                                     */
+/* ------------------------------------------------------------------ */
+
+export type FigureCell = {
+  label: string
+  value: ReactNode
+  note?: ReactNode
+  /** The one figure in a band that is allowed to be oxide: a cancelled count. */
+  oxide?: boolean
+}
+
+const FIGURE_SIZE = {
+  lg: "text-[1.75rem]",
+  md: "text-xl",
+  sm: "text-lg",
+} as const
+
+/**
+ * A ruled row of figures across the head of a sheet — the two, three or four
+ * numbers a reader takes in before anything else.
+ *
+ * Every figure in the band sits on one line, which is why the label block
+ * reserves two lines' height whether it needs them or not: a band where one
+ * caption wraps and the rest do not would step its figures down out of true,
+ * and a register that cannot keep a row of totals level is not a register.
+ */
+export function FigureRow({
+  cells,
+  size = "md",
+  className,
+}: {
+  cells: FigureCell[]
+  size?: keyof typeof FIGURE_SIZE
+  className?: string
+}) {
+  return (
+    // Measured against the sheet it sits in rather than the window: the same
+    // band of totals appears across a full-width sheet on the trace and inside
+    // a 22rem rail on the mark sheet, and only the sheet knows which.
+    <dl className={cn("grid grid-cols-2 @md:grid-cols-4", className)}>
+      {cells.map((cell, i) => (
+        <div
+          key={cell.label}
+          className={cn(
+            "border-rule px-4 py-3",
+            // Ruled into columns at width, and into pairs once it wraps.
+            i % 2 === 0 && "border-r",
+            i !== cells.length - 1 && "@md:border-r",
+            i < cells.length - 2 && "border-b @md:border-b-0",
+          )}
+        >
+          <dt className="label-form flex min-h-[2.2em] items-start">{cell.label}</dt>
+          <dd
+            className={cn(
+              "mt-1 font-mono leading-none font-medium tabular-nums",
+              FIGURE_SIZE[size],
+              cell.oxide && "text-oxide",
+            )}
+          >
+            {cell.value}
+          </dd>
+          {cell.note && (
+            <p className="mt-1.5 text-[0.6875rem] leading-tight text-muted-foreground">
+              {cell.note}
+            </p>
+          )}
+        </div>
+      ))}
+    </dl>
+  )
+}
+
+/* ------------------------------------------------------------------ */
 /* Marks in the margin                                                 */
 /* ------------------------------------------------------------------ */
 
@@ -195,10 +277,26 @@ export function Mark({
 export function Ruled({
   children,
   minWidth,
+  stickyHead,
   className,
 }: {
   children: ReactNode
   minWidth?: string
+  /**
+   * Hold the column headers at the top of a long sheet.
+   *
+   * `Th` is `position: sticky`, but a sticky element sticks to its nearest
+   * scroll container, and this wrapper is already one — `overflow-x: auto`
+   * makes the block scroll on *both* axes, so a header inside it sticks to a
+   * box that cannot scroll vertically, which is to say it does not stick at
+   * all. Capping the height gives that box something to scroll against, and
+   * a leaf of the roll then reads the way the paper does: the column names
+   * stay printed at the head while the candidates run under them.
+   *
+   * The print block in `index.css` releases both the cap and the scroll, so
+   * the whole leaf still comes out on paper.
+   */
+  stickyHead?: boolean
   className?: string
 }) {
   return (
@@ -207,7 +305,12 @@ export function Ruled({
     // positioned ancestor. Without it such a child escapes this scroller and
     // anchors to the page, reserving the table's full width as dead
     // horizontal scroll on narrow screens.
-    <div className="relative overflow-x-auto">
+    <div
+      className={cn(
+        "relative overflow-x-auto",
+        stickyHead && "overflow-y-auto max-h-[min(70svh,44rem)]",
+      )}
+    >
       <table
         style={minWidth ? { minWidth } : undefined}
         className={cn(
@@ -253,7 +356,11 @@ export function Th({
       scope="col"
       aria-sort={sort === "asc" ? "ascending" : sort === "desc" ? "descending" : undefined}
       className={cn(
-        "label-form sticky top-0 z-10 border-b border-rule bg-card px-3 py-2",
+        // The bottom rule is drawn as an inset shadow, not a border: on a
+        // `border-collapse` table a sticky cell's own border is painted with
+        // the row it belongs to and slides away underneath, while a shadow
+        // travels with the cell.
+        "label-form sticky top-0 z-10 bg-card px-3 py-2 shadow-[inset_0_-1px_0_var(--rule)]",
         align === "right" && "text-right",
         align === "center" && "text-center",
         align === "left" && "text-left",

@@ -61,7 +61,7 @@ export function ChecklistTable({
       {rows.length === 0 ? (
         <Empty>Nobody in this case was caught by this rule. Nothing to check.</Empty>
       ) : (
-        <Ruled minWidth="48rem">
+        <Ruled minWidth="48rem" stickyHead>
           <thead>
             <tr>
               {canVerify && (

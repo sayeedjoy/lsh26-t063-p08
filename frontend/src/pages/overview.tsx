@@ -25,7 +25,10 @@ function AuditStrip({ caseId, onOpenAudit }: { caseId: string; onOpenAudit: () =
         <Mark tone={data.pass ? "seal" : "oxide"}>
           {data.pass ? "roll examined" : "roll short"}
         </Mark>
-        <p className="min-w-0 flex-1 text-xs leading-relaxed text-muted-foreground">
+        {/* `min-w` rather than `min-w-0`: without a floor the sentence just
+            squeezes into a ribbon beside the button instead of wrapping under
+            it, which is what a wrapping flex row is for. */}
+        <p className="min-w-[15rem] flex-1 text-xs leading-relaxed text-muted-foreground">
           {met} of {data.criteria.length} criteria met.{" "}
           <span className="font-mono tabular-nums text-foreground">
             {data.hardEdgeStudents.length}

@@ -222,7 +222,10 @@ export function CalculatorPage({ caseId, sheetId }: { caseId: string; sheetId: n
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="space-y-4">
           <section>
-            <h3 className="label-form mb-2">Six compulsory subjects</h3>
+            <h3 className="label-form mb-2 flex items-baseline gap-2">
+              Six compulsory subjects
+              <span className="cite">R-GP</span>
+            </h3>
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {caseData.compulsory.map((code) => {
                 const subject = caseData.subjects.find((s) => s.code === code)!
@@ -240,17 +243,21 @@ export function CalculatorPage({ caseId, sheetId }: { caseId: string; sheetId: n
             </div>
           </section>
 
+          {/* The fourth subject stands on its own line rather than as a lone
+              card in a two-up grid: it is the one subject the rules treat
+              differently, and a half-empty row said nothing about that. */}
           <section>
-            <h3 className="label-form mb-2">Optional subject</h3>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <MarkInput
-                subject={caseData.subjects.find((s) => s.code === optional)!}
-                role="optional"
-                value={marks[optional] ?? 0}
-                trace={traceFor(optional)}
-                onChange={(next) => setMark(optional, next)}
-              />
-            </div>
+            <h3 className="label-form mb-2 flex items-baseline gap-2">
+              Optional subject
+              <span className="cite">R-13 · R-29</span>
+            </h3>
+            <MarkInput
+              subject={caseData.subjects.find((s) => s.code === optional)!}
+              role="optional"
+              value={marks[optional] ?? 0}
+              trace={traceFor(optional)}
+              onChange={(next) => setMark(optional, next)}
+            />
           </section>
         </div>
 
@@ -282,9 +289,11 @@ export function CalculatorPage({ caseId, sheetId }: { caseId: string; sheetId: n
               )}
               {saveError && <p className="text-[0.6875rem] text-oxide">{saveError}</p>}
 
-              <details className="border border-rule bg-card">
+              {/* Open by default: the rail has the room, and the whole point
+                  of this page is watching the working change as you type. */}
+              <details open className="border border-rule bg-card">
                 <summary className="label-form cursor-pointer px-3 py-2 select-none hover:text-foreground">
-                  Show the arithmetic
+                  The arithmetic
                 </summary>
                 <div className="border-t border-rule">
                   <GpaWorking student={result} />

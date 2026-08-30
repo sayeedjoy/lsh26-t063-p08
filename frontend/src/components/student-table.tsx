@@ -209,7 +209,7 @@ export function StudentTable({
           .
         </Empty>
       ) : (
-        <Ruled minWidth="46rem">
+        <Ruled minWidth="46rem" stickyHead>
           <thead>
             <tr>
               <Th sort={sortFor("name")} onSort={() => toggleSort("name")}>

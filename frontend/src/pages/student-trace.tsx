@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { ChevronLeft, ChevronRight, Printer, Search } from "lucide-react"
 
 import { ErrorState, LoadingState, PageHead } from "@/App"
@@ -42,6 +42,49 @@ export function StudentTracePage({
   const student = index >= 0 ? results[index]! : null
   const previous = index > 0 ? results[index - 1]! : null
   const next = index >= 0 && index < results.length - 1 ? results[index + 1]! : null
+
+  /**
+   * Land on a candidate and the roll should be open at them.
+   *
+   * The trace is reached from a table row, a search or a bare URL, so the
+   * candidate on screen is usually nowhere near the top of the list beside
+   * it. Bringing the current entry into view is what makes the rail read as
+   * the place you are in the roll rather than a separate list that happens
+   * to start at S001.
+   */
+  const currentEntry = useRef<HTMLButtonElement | null>(null)
+  useEffect(() => {
+    // `matches` and not `query`: on first paint the roll has not arrived yet
+    // and there is no entry to scroll to, so this has to run again once the
+    // list it is scrolling through actually exists.
+    currentEntry.current?.scrollIntoView({ block: "nearest" })
+  }, [studentId, matches])
+
+  /**
+   * Checking a roll means walking it, so J and K step one candidate at a
+   * time without leaving the trace, and the arrow keys do the same while the
+   * focus is inside the rail — where a list is what arrows are for. Away
+   * from the rail the arrows are left alone, because taking them means
+   * taking the page's own scrolling with them.
+   */
+  const rail = useRef<HTMLDivElement | null>(null)
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.metaKey || e.ctrlKey || e.altKey) return
+      const target = e.target as HTMLElement | null
+      const inRail = !!target && !!rail.current?.contains(target)
+      if (!inRail && target?.closest("input, textarea, select, [contenteditable='true']")) return
+
+      const forward = e.key === "j" || (inRail && e.key === "ArrowDown")
+      const back = e.key === "k" || (inRail && e.key === "ArrowUp")
+      const step = forward ? next : back ? previous : null
+      if (!step) return
+      e.preventDefault()
+      onSelectStudent(step.id)
+    }
+    window.addEventListener("keydown", onKeyDown)
+    return () => window.removeEventListener("keydown", onKeyDown)
+  }, [previous, next, onSelectStudent])
 
   if (error) return <ErrorState message={error} />
   if (loading && !data) return <LoadingState />
@@ -113,7 +156,17 @@ export function StudentTracePage({
             />
           </div>
 
-          <div className="max-h-[65vh] overflow-y-auto border border-rule bg-card">
+          <p className="mb-2 flex items-center justify-between gap-2 font-mono text-[0.6875rem] text-muted-foreground tabular-nums">
+            <span>
+              {query.trim() ? `${matches.length} of ${results.length}` : `${results.length} candidates`}
+            </span>
+            <span className="hidden lg:inline">
+              <kbd className="rounded-sm border border-rule px-1">J</kbd>{" "}
+              <kbd className="rounded-sm border border-rule px-1">K</kbd> to step
+            </span>
+          </p>
+
+          <div ref={rail} className="max-h-[65vh] overflow-y-auto border border-rule bg-card">
             {matches.length === 0 ? (
               <Empty>No candidate matches “{query}”.</Empty>
             ) : (
@@ -122,6 +175,7 @@ export function StudentTracePage({
                 return (
                   <button
                     key={s.id}
+                    ref={current ? currentEntry : undefined}
                     onClick={() => onSelectStudent(s.id)}
                     aria-current={current ? "true" : undefined}
                     className={cn(

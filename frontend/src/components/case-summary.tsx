@@ -1,5 +1,5 @@
 import type { CaseSummary, LetterGrade } from "@/engine"
-import { Figure, Ruled, Sheet, SheetHead, Td, Th, Tr } from "@/components/ledger"
+import { Figure, FigureRow, Ruled, Sheet, SheetHead, Td, Th, Tr } from "@/components/ledger"
 import { cn } from "@/lib/utils"
 
 /** Best grade first. F is last because it is not a grade so much as a verdict. */
@@ -17,46 +17,22 @@ function letterFill(letter: LetterGrade, index: number) {
  * numbers the office reads first.
  */
 function FigureBand({ summary }: { summary: CaseSummary }) {
-  const entries = [
-    { label: "Candidates", value: String(summary.students), note: summary.classes.join(" · ") },
-    { label: "Passed", value: String(summary.passed), note: `${summary.passRate}% of the roll` },
-    {
-      label: "Cancelled",
-      value: String(summary.failed),
-      note: "a compulsory subject failed",
-      oxide: summary.failed > 0,
-    },
-    { label: "Average GPA", value: summary.averageGpa, note: "passed candidates only" },
-  ]
-
   return (
     <Sheet>
-      <dl className="grid grid-cols-2 sm:grid-cols-4">
-        {entries.map((entry, i) => (
-          <div
-            key={entry.label}
-            className={cn(
-              "border-rule px-4 py-3",
-              // Ruled into columns, and into two rows once it wraps on mobile.
-              i % 2 === 0 && "border-r sm:border-r",
-              i === 1 && "sm:border-r",
-              i === 2 && "sm:border-r",
-              i < 2 && "border-b sm:border-b-0",
-            )}
-          >
-            <dt className="label-form">{entry.label}</dt>
-            <dd
-              className={cn(
-                "mt-1 font-mono text-[1.75rem] leading-none font-medium tabular-nums",
-                entry.oxide && "text-oxide",
-              )}
-            >
-              {entry.value}
-            </dd>
-            <p className="mt-1.5 text-[0.6875rem] leading-tight text-muted-foreground">{entry.note}</p>
-          </div>
-        ))}
-      </dl>
+      <FigureRow
+        size="lg"
+        cells={[
+          { label: "Candidates", value: summary.students, note: summary.classes.join(" · ") },
+          { label: "Passed", value: summary.passed, note: `${summary.passRate}% of the roll` },
+          {
+            label: "Cancelled",
+            value: summary.failed,
+            note: "a compulsory subject failed",
+            oxide: summary.failed > 0,
+          },
+          { label: "Average GPA", value: summary.averageGpa, note: "passed candidates only" },
+        ]}
+      />
     </Sheet>
   )
 }
@@ -109,7 +85,9 @@ function PerClass({ summary }: { summary: CaseSummary }) {
   return (
     <Sheet>
       <SheetHead title="By class" note="The same roll, split the way the school is." />
-      <Ruled>
+      {/* A minimum keeps the columns from crushing on a phone — the table
+          scrolls sideways instead of wrapping "Class 10" onto two lines. */}
+      <Ruled minWidth="28rem">
         <thead>
           <tr>
             <Th>Class</Th>
@@ -151,12 +129,6 @@ function ChecklistCounts({
   onOpenChecklists: () => void
 }) {
   const { checklistCounts: counts } = summary
-  const entries = [
-    { label: "Optional rule", value: counts.optional },
-    { label: "Practical fail", value: counts.practicalFail },
-    { label: "Absent", value: counts.absent },
-    { label: "On two or more", value: counts.multiple },
-  ]
 
   return (
     <Sheet cite="R-29">
@@ -173,23 +145,14 @@ function ChecklistCounts({
           </button>
         }
       />
-      <dl className="grid grid-cols-2 sm:grid-cols-4">
-        {entries.map((entry, i) => (
-          <div
-            key={entry.label}
-            className={cn(
-              "border-rule px-4 py-3",
-              i % 2 === 0 && "border-r",
-              i === 1 && "sm:border-r",
-              i === 2 && "sm:border-r",
-              i < 2 && "border-b sm:border-b-0",
-            )}
-          >
-            <dt className="label-form">{entry.label}</dt>
-            <dd className="mt-1 font-mono text-xl leading-none tabular-nums">{entry.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <FigureRow
+        cells={[
+          { label: "Optional rule", value: counts.optional },
+          { label: "Practical fail", value: counts.practicalFail },
+          { label: "Absent", value: counts.absent },
+          { label: "On two lists or more", value: counts.multiple },
+        ]}
+      />
     </Sheet>
   )
 }
