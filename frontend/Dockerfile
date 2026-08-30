@@ -14,6 +14,7 @@ RUN pnpm install --frozen-lockfile
 COPY tsconfig*.json vite.config.ts index.html ./
 COPY public ./public
 COPY src ./src
+COPY server.mjs ./
 RUN pnpm run build
 
 FROM node:22-alpine AS runtime
@@ -23,8 +24,11 @@ ENV PORT=8080
 RUN addgroup -S app && adduser -S app -G app
 
 # server.mjs uses only node: builtins, so no node_modules ships at all.
+# Staged through `build` (not copied from the host context here directly) —
+# some remote builders (e.g. Dokploy's) intermittently fail a late context
+# COPY in a fresh final stage; a COPY --from=<stage> doesn't hit that path.
 COPY --from=build /app/dist ./dist
-COPY server.mjs ./
+COPY --from=build /app/server.mjs ./
 
 USER app
 EXPOSE 8080

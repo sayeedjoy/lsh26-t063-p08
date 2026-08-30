@@ -12,6 +12,7 @@ RUN pnpm install --frozen-lockfile
 FROM deps AS build
 COPY tsconfig.json ./
 COPY src ./src
+COPY data ./data
 RUN pnpm run build
 
 # Only what the server needs at runtime — no tsx, no typescript.
@@ -31,7 +32,10 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json ./
 # The dataset is evidence the app cannot run without, so it ships in the image.
-COPY data ./data
+# Staged through `build` rather than copied from the host context here
+# directly — some remote builders (e.g. Dokploy's) intermittently fail a late
+# context COPY in a fresh final stage; a COPY --from=<stage> doesn't hit that.
+COPY --from=build /app/data ./data
 
 USER app
 EXPOSE 3000
