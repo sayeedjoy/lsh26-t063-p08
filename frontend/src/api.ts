@@ -49,7 +49,8 @@ const API_BASE = (
 export const apiUrl = (path: string) => `${API_BASE}/api${path}`
 
 async function request<T>(method: string, path: string, payload?: unknown): Promise<T> {
-  const res = await fetch(apiUrl(path), {
+  const url = apiUrl(path)
+  const res = await fetch(url, {
     method,
     ...(payload === undefined
       ? {}
@@ -62,6 +63,12 @@ async function request<T>(method: string, path: string, payload?: unknown): Prom
         ? String((body as { error: { message?: string } }).error?.message ?? res.statusText)
         : res.statusText
     throw new ApiError(res.status, message)
+  }
+  if (body === null) {
+    throw new ApiError(
+      res.status,
+      `The API returned a non-JSON response from ${url}. Check the frontend API_URL setting.`,
+    )
   }
   return body as T
 }

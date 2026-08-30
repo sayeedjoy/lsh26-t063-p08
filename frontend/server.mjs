@@ -92,6 +92,27 @@ const server = createServer((req, res) => {
     return;
   }
 
+  // An API request reaching the static server means API_URL was not set (or
+  // a same-origin reverse-proxy route is missing). Never serve index.html for
+  // it: a 200 HTML response looks superficially successful to fetch clients
+  // and leaves the application blank with no useful error.
+  if (url.pathname === '/api' || url.pathname.startsWith('/api/')) {
+    const body = JSON.stringify({
+      error: {
+        code: 'api_not_configured',
+        message:
+          'The frontend cannot reach the API. Set API_URL to the backend public origin (without /api).',
+      },
+    });
+    res.writeHead(502, {
+      'Content-Type': 'application/json; charset=utf-8',
+      'Content-Length': Buffer.byteLength(body),
+      'Cache-Control': 'no-store',
+    });
+    res.end(body);
+    return;
+  }
+
   if (req.method !== 'GET' && req.method !== 'HEAD') {
     res.writeHead(405, { Allow: 'GET, HEAD' });
     res.end();
